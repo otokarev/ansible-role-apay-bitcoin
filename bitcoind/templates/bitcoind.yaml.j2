@@ -31,6 +31,9 @@ spec:
         - "-c"
         - >
           exec /usr/bin/bitcoind
+{% if bitcoin_bitcoind_testnet %}
+          --testnet
+{% endif %}
           -rpcuser=$RPCUSER
           -rpcpassword=$RPCPASSWORD
           -zmqpubrawblock={{bitcoin_bitcoind_zmqpubrawblock}}

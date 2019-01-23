@@ -1,4 +1,5 @@
 bitcoin_bitcoind_image: kylemanna/bitcoind:latest
+bitcoin_bitcoind_testnet: false
 bitcoin_lnd_image: otokarev/lightningnetwork-lnd:latest
 bitcoin_bitcoind_resources:
   requests:
