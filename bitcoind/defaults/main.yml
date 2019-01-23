@@ -1,0 +1,15 @@
+bitcoin_bitcoind_image: kylemanna/bitcoind:latest
+bitcoin_lnd_image: otokarev/lightningnetwork-lnd:latest
+bitcoin_bitcoind_resources:
+  requests:
+    cpu: "200m"
+    memory: "1Gi"
+bitcoin_lnd_resources:
+  requests:
+    cpu: "200m"
+    memory: "1Gi"
+
+bitcoin_bitcoind_rpcuser: admin
+bitcoin_bitcoind_rpcpassword: 1q2w3e
+bitcoin_bitcoind_zmqpubrawblock: tcp://127.0.0.1:28332
+bitcoin_bitcoind_zmqpubrawtx: tcp://127.0.0.1:28333

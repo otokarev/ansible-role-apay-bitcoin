@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{bitcoin_litecoind_app_name}}"
+  labels:
+    app: "{{bitcoin_litecoind_app_name}}"
+    role: "bitcoind"
+    core_config_version: "{{bitcoin_litecoind_cfg_version}}"
+spec:
+  selector:
+    matchLabels:
+      app: "{{bitcoin_litecoind_app_name}}"
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: "{{bitcoin_litecoind_app_name}}"
+        role: "{{bitcoin_litecoind_app_role}}"
+    spec:
+      nodeSelector:
+        failure-domain.beta.kubernetes.io/zone: "{{zone}}"
+      containers:
+      - name: bitcoind
+        image: "{{bitcoin_litecoind_image}}"
+        command:
+        - "sh"
+        - "-c"
+        - >
+          exec /usr/bin/bitcoind
+          -rpcuser=$RPCUSER
+          -rpcpassword=$RPCPASSWORD
+          -zmqpubrawblock={{bitcoin_litecoind_zmqpubrawblock}}
+          -zmqpubrawtx={{bitcoin_litecoind_zmqpubrawtx}}
+        readinessProbe:
+          exec:
+            command:
+            - "/bin/bash"
+            - "-c"
+            - |
+              info="$(/usr/bin/bitcoin-cli \
+              -rpcuser=$RPCUSER \
+              -rpcpassword=$RPCPASSWORD \
+              getblockchaininfo)" \
+              && [ "$info" ] \
+              && blocks="$(echo $info |  sed -n 's/.*"blocks": \([0-9]*\),.*/\1/p')" \
+              && headers="$(echo $info |  sed -n 's/.*"headers": \([0-9]*\),.*/\1/p')" \
+              && let "delta=$headers-$blocks" 1 \
+              && [[ "$delta" -lt "5" ]];
+              RET="$?";
+              if [ "$RET" -gt 0 ]; then
+              progress=$(($blocks * 100 / $headers))
+              echo "readinessProbe failed for app{{ '{' }}{{app_name}}{{ '}' }} role{{ '{' }}{{app_role}}{{ '}' }} container{core} ns{{ '{' }}{{namespace}}{{ '}' }} zone{{ '{' }}{{zone}}{{ '}' }} progress{{ '{' }}$progress{{ '}' }}";
+              fi;
+              exit $RET;
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        env:
+        - name: RPCUSER
+          valueFrom:
+            secretKeyRef:
+              name: "{{bitcoin_litecoind_cfg_secret}}"
+              key: rpcuser
+        - name: RPCPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: "{{bitcoin_litecoind_cfg_secret}}"
+              key: rpcpassword
+{% if bitcoin_litecoind_resources is defined %}
+        resources:
+{% if bitcoin_litecoind_resources.requests is defined %}
+          requests:
+{% if bitcoin_litecoind_resources.requests.memory is defined %}
+            memory: "{{bitcoin_litecoind_resources.requests.memory}}"
+{% endif %}
+{% if bitcoin_litecoind_resources.requests.cpu is defined %}
+            cpu: "{{bitcoin_litecoind_resources.requests.cpu}}"
+{% endif %}
+{% endif %}
+{% if bitcoin_litecoind_resources.limits is defined %}
+          limits:
+{% if bitcoin_litecoind_resources.limits.memory is defined %}
+            memory: "{{bitcoin_litecoind_resources.limits.memory}}}"
+{% endif %}
+{% if bitcoin_litecoind_resources.limits.cpu is defined %}
+            cpu: "{{bitcoin_litecoind_resources.limits.cpu}}"
+{% endif %}
+{% endif %}
+{% endif %}
+        ports:
+        - name: btcd-rpc
+          containerPort: 8332
+        - name: btcd-p2p
+          containerPort: 8333
+        - name: btcd-zmqblock
+          containerPort: 28332
+        - name: btcd-zmqtx
+          containerPort: 28333
+        volumeMounts:
+        - name: bitcoin-bitcoind-data
+          mountPath: /bitcoin
+      volumes:
+        - name: bitcoin-bitcoind-data
+          gcePersistentDisk:
+            pdName: "{{bitcoin_litecoind_disk}}"
+            fsType: ext4

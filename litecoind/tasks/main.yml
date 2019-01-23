@@ -1,0 +1,7 @@
+- name: Deploy litecoin node
+  include_role:
+    name: k8s/utils/kubectl-create-or-replace
+  vars:
+    controller_kind: deploy
+    controller_name: "{{bitcoin_litecoind_app_name}}"
+    controller_template: bitcoind.yaml.j2

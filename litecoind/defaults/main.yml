@@ -1,0 +1,14 @@
+bitcoin_litecoind_image: uphold/litecoin-core:0.15
+bitcoin_litecoind_resources:
+  requests:
+    cpu: "200m"
+    memory: "1Gi"
+bitcoin_lnd_resources:
+  requests:
+    cpu: "200m"
+    memory: "1Gi"
+
+bitcoin_litecoind_rpcuser: admin
+bitcoin_litecoind_rpcpassword: 1q2w3e
+bitcoin_litecoind_zmqpubrawblock: tcp://127.0.0.1:28332
+bitcoin_litecoind_zmqpubrawtx: tcp://127.0.0.1:28333
