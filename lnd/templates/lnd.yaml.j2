@@ -26,13 +26,18 @@ spec:
       containers:
       - name: lnd
         image: "{{bitcoin_lnd_image}}"
-          command:
+        command:
           - "sh"
           - "-c"
           - >
             exec lnd
             --bitcoin.active
             --bitcoin.mainnet
+{% if bitcoin_lnd_testnet %}
+            --bitcoin.testnet
+{% else %}
+            --bitcoin.mainnet
+{% endif %}
             --bitcoin.node=bitcoind
             --bitcoind.rpcuser=$RPCUSER
             --bitcoind.rpcpass=$RPCPASSWORD
@@ -79,7 +84,7 @@ spec:
         - name: bitcoin-lnd-data
           mountPath: /root/.lnd
       volumes:
-        - name: lbitcoin-lnd-data
+        - name: bitcoin-lnd-data
           gcePersistentDisk:
             pdName: "{{bitcoin_lnd_disk}}"
             fsType: ext4

@@ -56,7 +56,7 @@ spec:
               RET="$?";
               if [ "$RET" -gt 0 ]; then
               progress=$(($blocks * 100 / $headers))
-              echo "readinessProbe failed for app{{ '{' }}{{app_name}}{{ '}' }} role{{ '{' }}{{app_role}}{{ '}' }} container{core} ns{{ '{' }}{{namespace}}{{ '}' }} zone{{ '{' }}{{zone}}{{ '}' }} progress{{ '{' }}$progress{{ '}' }}";
+              echo "readinessProbe failed for app{{ '{' }}{{bitcoin_bitcoind_app_name}}{{ '}' }} role{{ '{' }}{{bitcoin_bitcoind_app_role}}{{ '}' }} container{core} ns{{ '{' }}{{namespace}}{{ '}' }} zone{{ '{' }}{{zone}}{{ '}' }} progress{{ '{' }}$progress{{ '}' }}";
               fi;
               exit $RET;
           initialDelaySeconds: 20

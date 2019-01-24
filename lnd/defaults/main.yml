@@ -1,4 +1,5 @@
 bitcoin_lnd_image: otokarev/lightningnetwork-lnd:latest
+bitcoin_lnd_testnet: false
 bitcoin_lnd_resources:
   requests:
     cpu: "200m"
